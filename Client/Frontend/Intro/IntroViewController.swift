@@ -9,7 +9,7 @@ struct IntroViewControllerUX {
     static let Width = 375
     static let Height = 667
 
-    static let CardSlides = ["organize", "customize", "share", "choose", "sync"]
+    static let CardSlides = ["organize", "customize", "share", "choose", "sync", "sync"] // TODO Need asset for 'know'
     static let NumberOfCards = CardSlides.count
 
     static let PagerCenterOffsetFromScrollViewBottom = 30
@@ -23,25 +23,34 @@ struct IntroViewControllerUX {
     static let SignInButtonHeight = 46
     static let SignInButtonCornerRadius = CGFloat(4)
 
+    static let TurnOnNotificationsButtonTitle = NSLocalizedString("Turn on notifications", tableName: "Intro", comment: "See http://mzl.la/1T8gxwo")
+    static let TurnOnNotificationsButtonColor = UIColor(red: 0.259, green: 0.49, blue: 0.831, alpha: 1.0)
+    static let TurnOnNotificationsButtonHeight = 46
+    static let TurnOnNotificationsButtonCornerRadius = CGFloat(4)
+
     static let CardTextLineHeight = CGFloat(6)
 
     static let CardTitleOrganize = NSLocalizedString("Organize", tableName: "Intro", comment: "Title for one of the panels in the First Run tour.")
     static let CardTitleCustomize = NSLocalizedString("Customize", tableName: "Intro", comment: "Title for one of the panels in the First Run tour.")
     static let CardTitleShare = NSLocalizedString("Share", tableName: "Intro", comment: "Title for one of the panels in the First Run tour.")
     static let CardTitleChoose = NSLocalizedString("Choose", tableName: "Intro", comment: "Title for one of the panels in the First Run tour.")
+    static let CardTitleStayInTheKnow = NSLocalizedString("Stay in the know", tableName: "Intro", comment: "Title for one of the panels in the First Run tour.")
     static let CardTitleSync = NSLocalizedString("Sync your Devices.", tableName: "Intro", comment: "Title for one of the panels in the First Run tour.")
 
     static let CardTextOrganize = NSLocalizedString("Easily switch between open pages with tabs.", tableName: "Intro", comment: "Description for the 'Organize' panel in the First Run tour.")
     static let CardTextCustomize = NSLocalizedString("Personalize your default search engine and more in Settings.", tableName: "Intro", comment: "Description for the 'Customize' panel in the First Run tour.")
     static let CardTextShare = NSLocalizedString("Use the share sheet to send links from other apps to Firefox.", tableName: "Intro", comment: "Description for the 'Share' panel in the First Run tour.")
     static let CardTextChoose = NSLocalizedString("Tap, hold and move the Firefox icon into your dock for easy access.", tableName: "Intro", comment: "Description for the 'Choose' panel in the First Run tour.")
+    static let CardTextStayInTheKnow = NSLocalizedString("Turn on push notifications so you're always up-to-date on the latest features.", tableName: "Intro", comment: "Description for the 'Stay in the know' panel in the First Run tour.")
 
     static let Card1ImageLabel = NSLocalizedString("The Show Tabs button is next to the Address and Search text field and displays the current number of open tabs.", tableName: "Intro", comment: "Accessibility label for the UI element used to display the number of open tabs, and open the tab tray.")
     static let Card2ImageLabel = NSLocalizedString("The Settings button is at the beginning of the Tabs Tray.", tableName: "Intro", comment: "Accessibility label for the Settings button in the tab tray.")
     static let Card3ImageLabel = NSLocalizedString("Firefox and the cloud", tableName: "Intro", comment: "Accessibility label for the image displayed in the 'Sync' panel of the First Run tour.")
+    static let Card4ImageLabel = NSLocalizedString("Firefox and the cloud", tableName: "Intro", comment: "Accessibility label for the image displayed in the 'Sync' panel of the First Run tour.")
 
     static let CardTextSyncOffsetFromCenter = 25
     static let Card3ButtonOffsetFromCenter = -10
+    static let Card4ButtonOffsetFromCenter = -10
 
     static let FadeDuration = 0.25
 
@@ -50,6 +59,7 @@ struct IntroViewControllerUX {
     static let Card1Color = UIColor(rgb: 0xFFC81E)
     static let Card2Color = UIColor(rgb: 0x41B450)
     static let Card3Color = UIColor(rgb: 0x0096DD)
+    static let Card4Color = UIColor(rgb: 0x0096DD)
 }
 
 let IntroViewControllerSeenProfileKey = "IntroViewControllerSeen"
@@ -74,6 +84,7 @@ class IntroViewController: UIViewController, UIScrollViewDelegate {
     var pageControl: UIPageControl!
     var backButton: UIButton!
     var forwardButton: UIButton!
+    var turnOnNotificationsButton: UIButton!
     var signInButton: UIButton!
 
     fileprivate var scrollView: IntroOverlayScrollView!
@@ -153,6 +164,23 @@ class IntroViewController: UIViewController, UIScrollViewDelegate {
         addCard(IntroViewControllerUX.CardTextCustomize, title: IntroViewControllerUX.CardTitleCustomize)
         addCard(IntroViewControllerUX.CardTextShare, title: IntroViewControllerUX.CardTitleShare)
         addCard(IntroViewControllerUX.CardTextChoose, title: IntroViewControllerUX.CardTitleChoose)
+
+        // Stay in the know card, with Turn on notifications button.
+
+        turnOnNotificationsButton = UIButton()
+        turnOnNotificationsButton.backgroundColor = IntroViewControllerUX.TurnOnNotificationsButtonColor
+        turnOnNotificationsButton.setTitle(IntroViewControllerUX.TurnOnNotificationsButtonTitle, for: UIControlState())
+        turnOnNotificationsButton.setTitleColor(UIColor.white, for: UIControlState())
+        turnOnNotificationsButton.layer.cornerRadius = IntroViewControllerUX.TurnOnNotificationsButtonCornerRadius
+        turnOnNotificationsButton.clipsToBounds = true
+        turnOnNotificationsButton.addTarget(self, action: #selector(IntroViewController.SELturnOnNotifications), for: UIControlEvents.touchUpInside)
+        turnOnNotificationsButton.snp.makeConstraints { (make) -> Void in
+            make.height.equalTo(IntroViewControllerUX.TurnOnNotificationsButtonHeight)
+        }
+
+        let stayInTheKnowCardView =  UIView()
+        addViewsToIntroView(stayInTheKnowCardView, view: turnOnNotificationsButton, title: IntroViewControllerUX.CardTitleStayInTheKnow, text: IntroViewControllerUX.CardTextStayInTheKnow)
+        introViews.append(stayInTheKnowCardView)
 
         // Sync card, with sign in to sync button.
 
@@ -272,6 +300,10 @@ class IntroViewController: UIViewController, UIScrollViewDelegate {
 		delegate?.introViewControllerDidRequestToLogin(self)
     }
 
+    func SELturnOnNotifications() {
+//        delegate?.introViewControllerDidRequestToLogin(self)
+    }
+
     fileprivate var accessibilityScrollStatus: String {
         let number = NSNumber(value: pageControl.currentPage + 1)
         return String(format: NSLocalizedString("Introductory slide %@ of %@", tableName: "Intro", comment: "String spoken by assistive technology (like VoiceOver) stating on which page of the intro wizard we currently are. E.g. Introductory slide 1 of 3"), NumberFormatter.localizedString(from: number, number: .decimal), NumberFormatter.localizedString(from: NSNumber(value: IntroViewControllerUX.NumberOfCards), number: .decimal))
@@ -377,28 +409,39 @@ class IntroViewController: UIViewController, UIScrollViewDelegate {
         addViewsToIntroView(introView, view: label, title: title)
     }
 
-    fileprivate func addViewsToIntroView(_ introView: UIView, view: UIView, title: String = "") {
-        introView.addSubview(view)
-        view.snp.makeConstraints { (make) -> Void in
-            make.center.equalTo(introView)
+    fileprivate func addViewsToIntroView(_ introView: UIView, view: UIView, title: String, text: String = "") {
+        let titleLabel = UILabel()
+        //titleLabel.backgroundColor = UIColor.blue
+        titleLabel.numberOfLines = 0
+        titleLabel.textAlignment = NSTextAlignment.center
+        titleLabel.text = title
+        titleLabels.append(titleLabel)
+        introView.addSubview(titleLabel)
+        titleLabel.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(introView).offset(20)
+            //make.bottom.equalTo(view.snp.top)
+            make.centerX.equalTo(introView)
             make.width.equalTo(self.view.frame.width <= 320 ? 240 : 280) // TODO Talk to UX about small screen sizes
         }
 
-        if !title.isEmpty {
-            let titleLabel = UILabel()
-            titleLabel.numberOfLines = 0
-            titleLabel.textAlignment = NSTextAlignment.center
-            titleLabel.text = title
-            titleLabels.append(titleLabel)
-            introView.addSubview(titleLabel)
-            titleLabel.snp.makeConstraints { (make) -> Void in
-                make.top.equalTo(introView)
-                make.bottom.equalTo(view.snp.top)
-                make.centerX.equalTo(introView)
-                make.width.equalTo(self.view.frame.width <= 320 ? 240 : 280) // TODO Talk to UX about small screen sizes
-            }
-        }
+        let textLabel = UILabel()
+        //textLabel.backgroundColor = UIColor.red
+        textLabel.numberOfLines = 0
+        textLabel.attributedText = attributedStringForLabel(text)
+        textLabels.append(textLabel)
+        introView.addSubview(textLabel)
+        textLabel.snp.makeConstraints({ (make) -> Void in
+            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.centerX.equalTo(introView)
+            make.width.equalTo(self.view.frame.width <= 320 ? 240 : 280) // TODO Talk to UX about small screen sizes
+        })
 
+        introView.addSubview(view)
+        view.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(textLabel.snp.bottom).offset(20)
+            make.centerX.equalTo(introView)
+            make.width.equalTo(self.view.frame.width <= 320 ? 240 : 280) // TODO Talk to UX about small screen sizes
+        }
     }
 
     fileprivate func setupDynamicFonts() {

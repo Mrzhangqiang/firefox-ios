@@ -69,6 +69,7 @@ class ActivityStreamDataObserver: DataObserver {
     @objc func notificationReceived(_ notification: Notification) {
         switch notification.name {
         case NotificationProfileDidFinishSyncing, NotificationFirefoxAccountChanged, NotificationPrivateDataClearedHistory:
+            NSLog("MOO NotificationProfileDidFinishSyncing in ActivityStreamDataObserver")
             invalidate(highlights: true)
         default:
             log.warning("Received unexpected notification \(notification.name)")
