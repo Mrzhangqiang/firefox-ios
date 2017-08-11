@@ -41,6 +41,7 @@ enum UserAttributeKeyName: String {
     case klarInstalled = "Klar Installed"
     case signedInSync = "Signed In Sync"
     case mailtoIsDefault = "Mailto Is Default"
+    case pocketInstalled = "Pocket Installed"
     case telemetryOptIn = "Telemetry Opt In"
 }
 
@@ -118,6 +119,7 @@ class LeanplumIntegration {
         userAttributesDict[UserAttributeKeyName.mailtoIsDefault.rawValue] = mailtoIsDefault()
         userAttributesDict[UserAttributeKeyName.focusInstalled.rawValue] = !canInstallFocus()
         userAttributesDict[UserAttributeKeyName.klarInstalled.rawValue] = !canInstallKlar()
+        userAttributesDict[UserAttributeKeyName.pocketInstalled.rawValue] = !canInstallPocket()
         userAttributesDict[UserAttributeKeyName.signedInSync.rawValue] = profile?.hasAccount()
 
         Leanplum.start(userAttributes: userAttributesDict)
@@ -171,6 +173,13 @@ class LeanplumIntegration {
             return false
         }
         return !UIApplication.shared.canOpenURL(klar)
+    }
+
+    func canInstallPocket() -> Bool {
+        guard let pocket = URL(string: "pocket://") else {
+            return false
+        }
+        return !UIApplication.shared.canOpenURL(pocket)
     }
 
     func mailtoIsDefault() -> Bool {
