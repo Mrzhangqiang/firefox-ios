@@ -69,6 +69,10 @@ class LeanplumIntegration {
     fileprivate weak var profile: Profile?
     private var enabled: Bool = false
     
+    func isEnabled() -> Bool {
+        return enabled
+    }
+    
     func shouldSendToLP() -> Bool {
         // Need to be run on main thread since isInPrivateMode requires to be on the main thread.
         assert(Thread.isMainThread)

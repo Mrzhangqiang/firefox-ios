@@ -18,6 +18,7 @@ import WebImage
 import SwiftyJSON
 import Telemetry
 import Sentry
+import Leanplum
 
 private let log = Logger.browserLogger
 
@@ -608,7 +609,7 @@ class BrowserViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         log.debug("BVC viewDidAppear.")
-        presentIntroViewController() // TODO SMA
+        presentIntroViewController()
         log.debug("BVC intro presented.")
         self.webViewContainerToolbar.isHidden = false
 
@@ -2998,6 +2999,14 @@ extension BrowserViewController: IntroViewControllerDelegate {
                 _ = self.navigationController?.popToRootViewController(animated: true)
             }
         }
+    }
+    
+    func introViewControllerShouldAskForNotifications(_ introViewController: IntroViewController) -> Bool {
+        return Leanplum.hasStarted()
+    }
+    
+    func introViewControllerDidRequestToEnableNotifications(_ introViewController: IntroViewController) {
+        UIApplication.shared.registerForRemoteNotifications()
     }
 
     func presentSignInViewController(_ fxaOptions: FxALaunchParams? = nil) {
